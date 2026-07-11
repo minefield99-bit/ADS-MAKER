@@ -1,5 +1,16 @@
 HANDOFF. Shared logbook between the coding sessions and the Cowork sessions. Read this at the start of every session, update it before you finish, newest entry on top.
 
+Entry 2026-07-12, written by a Cowork session through the GitHub website
+
+STATUS: green, unchanged. Recording a future project from Luke. Do not start it before the first real phone generation test passes.
+
+FUTURE PROJECT, Week 2 or later: a true Windows desktop version of Ads Maker.
+Why: Luke wants the app installable on his Windows laptop without helper programs. The Android APK already covers his phone and his Android tablet, so this is desktop only.
+Direction: the app is Jetpack Compose with a clean domain and data split behind the VideoGenerator interface, so the natural route is Compose Multiplatform, sharing domain, data and most UI, with desktop replacements for the Android-only parts: media picking, gallery export and share, encrypted key storage, and BuildConfig. Scope it properly first; it is a real project, not a tweak.
+Priority order stays: first the real end-to-end generation on the phone, then big-screen layout polish if wanted, then this desktop project.
+
+---
+
 Entry 2026-07-11 night, written by a Claude Code coding session
 
 STATUS: GREEN. Priority-one feature (in-app API key entry) is DONE and CI is passing. A new app-debug APK with the feature is ready to download.
