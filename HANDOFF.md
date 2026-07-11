@@ -1,5 +1,27 @@
 HANDOFF. Shared logbook between the coding sessions and the Cowork sessions. Read this at the start of every session, update it before you finish, newest entry on top.
 
+Entry 2026-07-11 night, written by a Claude Code coding session
+
+STATUS: GREEN. Priority-one feature (in-app API key entry) is DONE and CI is passing. A new app-debug APK with the feature is ready to download.
+
+Priority-one delivered (commit 10b3dfa, CI run #7 all green: SDK, unit tests, assembleDebug, artifact upload):
+- Settings screen for the fal.ai key, reached two ways: the gear icon in the top bar, or the "Enter API key" button on the "API key needed" card. Paste / Replace / Remove. Shown password-style while typing (with a show/hide eye), masked to the last 4 chars after saving.
+- Stored ENCRYPTED on-device: AES-256/GCM in the hardware-backed Android Keystore (SecureApiKeyStore + KeystoreCrypto). Only ciphertext is persisted. No third-party crypto dependency added.
+- Never logged: HTTP logging is BASIC level (no headers), and the auth header is omitted when the key is blank.
+- Precedence: a key entered in the app overrides the build-time BuildConfig.FAL_API_KEY; the BuildConfig key stays as a dev fallback. Logic is in ApiKeyResolver and unit-tested.
+- Takes effect immediately: the OkHttp auth interceptor reads the key via a provider on every request, so no app restart is needed after saving. The create screen re-checks key state when you return from Settings.
+- README updated with a phone-only setup path.
+
+FOR LUKE, phone-only (no Android Studio) — the moment of truth (step 2 below):
+1. Open the repo Actions tab, latest green "Android CI" run (run #7, commit 10b3dfa), download the "app-debug" artifact (a zip containing app-debug.apk). Artifact is ~20 MB, expires 2026-10-09.
+2. Unzip, transfer app-debug.apk to your Android phone (API 26+), install it (allow "install unknown apps").
+3. Open Ads Maker, tap the gear icon, paste your fal.ai key (from fal.ai/dashboard/keys), Save.
+4. Pick a product picture, tap Generate, confirm the ~1.35 USD cost, and see if it produces a usable ad. This is the first real end-to-end test against live fal.ai.
+
+Still unverified (needs that live run): whether the Seedance call actually returns a good video, the model slug bytedance/seedance-2.0-fast/image-to-video, the data-URI image path, and live pricing. If generation fails, the in-app error message plus logcat tag "AdsMakerUsage" will show what happened.
+
+---
+
 Entry 2026-07-11 evening, written by a Cowork session through the GitHub website
 
 STATUS: still green. New top priority from Luke: make the app testable phone-only, without Android Studio.
