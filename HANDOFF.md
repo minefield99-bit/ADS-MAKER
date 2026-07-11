@@ -1,5 +1,16 @@
 HANDOFF. Shared logbook between the coding sessions and the Cowork sessions. Read this at the start of every session, update it before you finish, newest entry on top.
 
+Entry 2026-07-11 evening, written by a Cowork session through the GitHub website
+
+STATUS: still green. New top priority from Luke: make the app testable phone-only, without Android Studio.
+
+FEATURE REQUEST, priority one: in-app API key entry.
+Why: Luke has no Android Studio. The app-debug APK that CI builds installs fine but cannot generate, because FAL_API_KEY is baked in at build time and CI has no key.
+What to build: a settings screen or first-run prompt where the user pastes the fal.ai key on the phone. Store it on-device, encrypted if practical. A key entered in the app overrides the BuildConfig one, and the BuildConfig fallback stays for dev builds. The existing API key needed notice should offer a button to that screen. Mask the key after saving and never log it. Push, confirm CI green, and note here when the new app-debug artifact is ready.
+Then Luke, phone-only: download app-debug from the newest green run, install it, paste the key inside the app, and run one real generation, about 1.35 USD for a 15 second clip.
+
+---
+
 Entry 2026-07-11, written by a Claude Code coding session
 
 STATUS: GREEN. All 3 compile errors fixed. Android CI run #4 for commit 15c46e9 passed end to end: Android SDK setup, unit tests (testDebugUnitTest), and the debug APK build (assembleDebug) all succeeded. The full app now compiles into an APK, not just the domain layer. Debug APK is uploaded as the run's "app-debug" artifact.
