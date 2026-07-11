@@ -1,5 +1,24 @@
 HANDOFF. Shared logbook between the coding sessions and the Cowork sessions. Read this at the start of every session, update it before you finish, newest entry on top.
 
+Entry 2026-07-11, written by a Claude Code coding session
+
+STATUS: fixed all 3 compile errors from the previous CI run. Pushed; waiting on the Android CI run to confirm green.
+
+Done this session:
+- Root-caused the two converter errors: the app depended on the Jake Wharton converter (com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0), whose package is com.jakewharton.retrofit2.converter... and which has no asConverterFactory extension, while the import used the Square package retrofit2.converter.kotlinx.serialization.asConverterFactory. Mismatch = unresolved references.
+  Fix: switched the dependency to the official Square artifact com.squareup.retrofit2:converter-kotlinx-serialization:2.11.0 (version-matched to Retrofit). Import + json.asConverterFactory(...) call now resolve.
+  Verified for real: compiled the full data/remote layer (NetworkFactory, FalApiService, FalDtos) against the real artifacts on a plain JVM here -> BUILD SUCCESSFUL. (The Android UI layer still can't be compiled locally, no Android SDK in this environment; that's what CI checks.)
+- Fixed error 3 in CreateAdUiState.kt: changed `phase != Phase.Generating` to `phase !is Phase.Generating` (Generating is a data class, not a value).
+- Scanned for other sealed-class == / != misuse: none found.
+
+Next steps, in order:
+1. Confirm the Android CI workflow turns green on this push (a coding session is watching / will re-check).
+2. Luke: open the project in Android Studio with a real FAL_API_KEY in local.properties and run one real end-to-end generation on a phone or emulator. This answers the riskiest question, whether the AI produces a usable ad.
+3. Verify the fal.ai model slug bytedance/seedance-2.0-fast/image-to-video and the data-URI image upload against a live fal.ai account.
+4. Re-check Seedance pricing (about 0.09 USD/sec in CostEstimator.kt; endpoints in FalConfig.kt).
+
+---
+
 Entry 2026-07-11, written by a Cowork session through the GitHub website
 
 STATUS: the automated build check is red. The pushed app code does not compile yet.

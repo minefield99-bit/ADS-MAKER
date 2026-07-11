@@ -25,7 +25,7 @@ data class CreateAdUiState(
 
     val canGenerate: Boolean
         get() = (hasImage || !notesPreview.isNullOrBlank()) &&
-            phase != Phase.Generating &&
+            phase !is Phase.Generating &&
             !apiKeyMissing
 
     sealed interface Phase {
