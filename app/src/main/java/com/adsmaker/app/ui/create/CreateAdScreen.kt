@@ -26,6 +26,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Description
 import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Movie
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -33,6 +34,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
@@ -59,6 +61,7 @@ import com.adsmaker.app.domain.CostEstimator
 fun CreateAdScreen(
     viewModel: CreateAdViewModel,
     onGenerated: () -> Unit,
+    onOpenSettings: () -> Unit,
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -98,6 +101,11 @@ fun CreateAdScreen(
         topBar = {
             TopAppBar(
                 title = { Text("Ads Maker") },
+                actions = {
+                    IconButton(onClick = onOpenSettings) {
+                        Icon(Icons.Default.Settings, contentDescription = "API key settings")
+                    }
+                },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = MaterialTheme.colorScheme.onBackground,
@@ -124,7 +132,7 @@ fun CreateAdScreen(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
 
-                if (state.apiKeyMissing) ApiKeyMissingCard()
+                if (state.apiKeyMissing) ApiKeyMissingCard(onOpenSettings = onOpenSettings)
 
                 UploadCard(
                     icon = Icons.Default.Image,
@@ -249,19 +257,23 @@ private fun PlatformStyleCard() {
 }
 
 @Composable
-private fun ApiKeyMissingCard() {
+private fun ApiKeyMissingCard(onOpenSettings: () -> Unit) {
     Card(
         colors = CardDefaults.cardColors(containerColor = Color(0xFF3A1D2A)),
         shape = RoundedCornerShape(16.dp),
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Column(Modifier.padding(16.dp)) {
+        Column(
+            Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
+        ) {
             Text("API key needed", style = MaterialTheme.typography.titleMedium)
             Text(
-                "Add FAL_API_KEY to local.properties to enable generation. See README.",
+                "Enter your fal.ai API key to enable generation. It's stored encrypted on this phone.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
+            Button(onClick = onOpenSettings) { Text("Enter API key") }
         }
     }
 }

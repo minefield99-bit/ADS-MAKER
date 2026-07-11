@@ -20,13 +20,21 @@ object NetworkFactory {
         explicitNulls = false
     }
 
-    fun createFalService(apiKey: String, enableLogging: Boolean): FalApiService {
+    /**
+     * [keyProvider] is read on every request, so a key the user enters in the app
+     * takes effect immediately without rebuilding the network stack. When it's
+     * blank we omit the header entirely (the request 401s and surfaces a clear
+     * "check your key" message rather than sending "Key ").
+     */
+    fun createFalService(keyProvider: () -> String, enableLogging: Boolean): FalApiService {
         val authInterceptor = okhttp3.Interceptor { chain ->
-            val request = chain.request().newBuilder()
-                .header("Authorization", "Key $apiKey")
+            val builder = chain.request().newBuilder()
                 .header("Accept", "application/json")
-                .build()
-            chain.proceed(request)
+            val key = keyProvider().trim()
+            if (key.isNotEmpty()) {
+                builder.header("Authorization", "Key $key")
+            }
+            chain.proceed(builder.build())
         }
 
         val clientBuilder = OkHttpClient.Builder()

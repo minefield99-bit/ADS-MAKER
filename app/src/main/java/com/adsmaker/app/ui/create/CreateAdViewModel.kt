@@ -25,15 +25,21 @@ import kotlinx.coroutines.launch
 class CreateAdViewModel(
     app: Application,
     private val repository: AdRepository,
-    private val apiKeyMissing: Boolean,
+    /** Returns whether a usable API key currently exists (from either source). */
+    private val hasApiKey: () -> Boolean,
 ) : AndroidViewModel(app) {
 
     private var imageUri: Uri? = null
     private var videoUri: Uri? = null
     private var productNotes: String? = null
 
-    private val _uiState = MutableStateFlow(CreateAdUiState(apiKeyMissing = apiKeyMissing))
+    private val _uiState = MutableStateFlow(CreateAdUiState(apiKeyMissing = !hasApiKey()))
     val uiState: StateFlow<CreateAdUiState> = _uiState.asStateFlow()
+
+    /** Re-check the key after the user may have entered one in Settings. */
+    fun refreshApiKeyState() {
+        _uiState.update { it.copy(apiKeyMissing = !hasApiKey()) }
+    }
 
     fun onImagePicked(uri: Uri?) {
         imageUri = uri
@@ -132,7 +138,7 @@ class CreateAdViewModel(
                 return CreateAdViewModel(
                     app = app,
                     repository = app.serviceLocator.adRepository,
-                    apiKeyMissing = !app.serviceLocator.hasApiKey,
+                    hasApiKey = { app.serviceLocator.hasApiKey },
                 ) as T
             }
         }

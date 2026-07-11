@@ -6,6 +6,9 @@ import com.adsmaker.app.data.remote.NetworkFactory
 import com.adsmaker.app.data.repository.AdRepository
 import com.adsmaker.app.data.session.LocalSessionProvider
 import com.adsmaker.app.data.session.SessionProvider
+import com.adsmaker.app.data.settings.ApiKeyResolver
+import com.adsmaker.app.data.settings.ApiKeyStore
+import com.adsmaker.app.data.settings.SecureApiKeyStore
 import com.adsmaker.app.data.usage.InMemoryUsageLogger
 import com.adsmaker.app.data.usage.UsageLogger
 import com.adsmaker.app.data.video.SeedanceVideoGenerator
@@ -19,8 +22,15 @@ import com.adsmaker.app.data.video.VideoGenerator
  */
 class ServiceLocator(private val appContext: Context) {
 
-    /** True when a fal.ai key was supplied at build time. */
-    val hasApiKey: Boolean get() = BuildConfig.FAL_API_KEY.isNotBlank()
+    /** On-device store for a user-entered fal.ai key (settable in the app). */
+    val apiKeyStore: ApiKeyStore by lazy { SecureApiKeyStore(appContext) }
+
+    /** User-entered key wins; the build-time key is the dev fallback. */
+    fun effectiveApiKey(): String =
+        ApiKeyResolver.resolve(apiKeyStore.getUserKey(), BuildConfig.FAL_API_KEY)
+
+    /** True when a usable key exists from either source. Evaluated on demand. */
+    val hasApiKey: Boolean get() = effectiveApiKey().isNotBlank()
 
     private val usageLogger: UsageLogger by lazy { InMemoryUsageLogger() }
 
@@ -28,7 +38,7 @@ class ServiceLocator(private val appContext: Context) {
 
     private val videoGenerator: VideoGenerator by lazy {
         val api = NetworkFactory.createFalService(
-            apiKey = BuildConfig.FAL_API_KEY,
+            keyProvider = ::effectiveApiKey,
             enableLogging = BuildConfig.DEBUG,
         )
         SeedanceVideoGenerator(api)

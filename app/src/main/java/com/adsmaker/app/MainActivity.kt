@@ -17,6 +17,8 @@ import androidx.navigation.compose.rememberNavController
 import com.adsmaker.app.ui.create.CreateAdScreen
 import com.adsmaker.app.ui.create.CreateAdViewModel
 import com.adsmaker.app.ui.preview.PreviewScreen
+import com.adsmaker.app.ui.settings.SettingsScreen
+import com.adsmaker.app.ui.settings.SettingsViewModel
 import com.adsmaker.app.ui.theme.AdsMakerTheme
 
 class MainActivity : ComponentActivity() {
@@ -39,6 +41,7 @@ class MainActivity : ComponentActivity() {
 private object Routes {
     const val CREATE = "create"
     const val PREVIEW = "preview"
+    const val SETTINGS = "settings"
 }
 
 @androidx.compose.runtime.Composable
@@ -56,6 +59,18 @@ private fun AdsMakerApp() {
                     navController.navigate(Routes.PREVIEW) {
                         launchSingleTop = true
                     }
+                },
+                onOpenSettings = { navController.navigate(Routes.SETTINGS) },
+            )
+        }
+        composable(Routes.SETTINGS) {
+            val settingsViewModel: SettingsViewModel = viewModel(factory = SettingsViewModel.factory())
+            SettingsScreen(
+                viewModel = settingsViewModel,
+                onBack = {
+                    // Re-check the key so the create screen reflects a newly-saved one.
+                    viewModel.refreshApiKeyState()
+                    navController.popBackStack()
                 },
             )
         }

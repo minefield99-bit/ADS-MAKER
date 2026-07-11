@@ -24,15 +24,28 @@ Out of scope for Week 1 (documented for later): Instagram/YouTube formats,
 auto-posting, accounts, and payments.
 
 ## Setup
+
+You need a fal.ai API key (free to create): <https://fal.ai/dashboard/keys>.
+
+### Option A — phone only, no Android Studio (easiest)
+1. Download the **`app-debug`** artifact from the latest green [Android CI run](../../actions).
+2. Install the APK on an Android phone (API 26+; allow "install unknown apps").
+3. Open the app → tap the **settings (gear) icon** (or the **Enter API key** button on
+   the "API key needed" card) → paste your fal.ai key → **Save**.
+   The key is encrypted with the Android Keystore and stored only on that phone.
+
+### Option B — Android Studio (for development)
 1. Open the project in **Android Studio** (Ladybug or newer) with **Android SDK 35**.
-2. Get a fal.ai API key: <https://fal.ai/dashboard/keys>.
-3. Copy `local.properties.example` → `local.properties` and set:
+2. Copy `local.properties.example` → `local.properties` and set:
    ```properties
    FAL_API_KEY=your_fal_api_key_here
    ```
-   (`local.properties` is git-ignored; the key is injected via `BuildConfig` and
-   never committed. Without a key the app runs but shows an "API key needed" notice.)
-4. Run on a device/emulator with **API 26+**.
+   (`local.properties` is git-ignored; the key is injected via `BuildConfig`.)
+3. Run on a device/emulator with **API 26+**.
+
+**Key precedence:** a key entered in the app always overrides the build-time
+`BuildConfig` key. The build-time key stays as a dev-only fallback, so CI-built
+APKs (which have no baked-in key) still work once you paste a key in the app.
 
 > **Re-verify Seedance pricing/access before launch** — rates and access routes in
 > this space change fast. Both are isolated to one file each
