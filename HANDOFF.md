@@ -2,7 +2,9 @@ HANDOFF. Shared logbook between the coding sessions and the Cowork sessions. Rea
 
 Entry 2026-07-11, written by a Claude Code coding session
 
-STATUS: fixed all 3 compile errors from the previous CI run. Pushed; waiting on the Android CI run to confirm green.
+STATUS: GREEN. All 3 compile errors fixed. Android CI run #4 for commit 15c46e9 passed end to end: Android SDK setup, unit tests (testDebugUnitTest), and the debug APK build (assembleDebug) all succeeded. The full app now compiles into an APK, not just the domain layer. Debug APK is uploaded as the run's "app-debug" artifact.
+
+The riskiest UNTESTED thing is now step 2 below: no real end-to-end generation has run against a live fal.ai account yet. Green CI proves it compiles and unit tests pass; it does NOT prove the Seedance call actually returns a usable video.
 
 Done this session:
 - Root-caused the two converter errors: the app depended on the Jake Wharton converter (com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:1.0.0), whose package is com.jakewharton.retrofit2.converter... and which has no asConverterFactory extension, while the import used the Square package retrofit2.converter.kotlinx.serialization.asConverterFactory. Mismatch = unresolved references.
