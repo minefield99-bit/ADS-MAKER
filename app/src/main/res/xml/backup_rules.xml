@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<full-backup-content>
+    <!-- Don't back up cached generated videos or the local usage log. -->
+    <exclude domain="file" path="generated/" />
+</full-backup-content>

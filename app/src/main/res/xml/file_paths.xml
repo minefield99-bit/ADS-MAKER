@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <!-- Generated videos cached in the app's files dir, shared out via FileProvider. -->
+    <files-path name="generated" path="generated/" />
+    <cache-path name="cache" path="." />
+    <external-files-path name="external_generated" path="generated/" />
+</paths>

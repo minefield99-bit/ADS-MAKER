@@ -1,0 +1,10 @@
+# Copy this file to `local.properties` and fill in the values below.
+# `local.properties` is git-ignored so your secrets never get committed.
+
+# --- Android SDK location (set automatically by Android Studio) ---
+# sdk.dir=/path/to/Android/Sdk
+
+# --- fal.ai API key (required to generate videos) ---
+# Get one at https://fal.ai/dashboard/keys
+# The build reads this and exposes it as BuildConfig.FAL_API_KEY.
+FAL_API_KEY=your_fal_api_key_here
