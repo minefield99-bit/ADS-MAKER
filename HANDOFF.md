@@ -1,5 +1,16 @@
 HANDOFF. Shared logbook between the coding sessions and the Cowork sessions. Read this at the start of every session, update it before you finish, newest entry on top.
 
+Entry 2026-07-12 afternoon, written by a Cowork session through the GitHub website
+
+STATUS: green. The run 8 app-debug APK was delivered to Luke through the Claude chat, checksum verified against the artifact digest. Phone install and first real generation are up next on his side. New feature request from Luke before his test runs.
+
+FEATURE REQUEST, priority one: cheap draft mode for generation.
+Why: Luke wants to experiment several times without paying about 1.35 USD per try. Cost is fal.ai per-second pricing, so shorter and lower-resolution test clips are the lever.
+What to build: a clearly labeled Draft toggle on the create screen. Draft generates about 5 seconds at the lowest resolution Seedance 2.0 Fast handles well, audio kept on, and shows its own lower cost estimate before the confirm tap. Final mode stays exactly as today, 15 seconds, 9:16, 720p. The usage log should record draft or final on every attempt. While in there, verify live fal.ai per-second pricing for both resolutions and correct CostEstimator if the 0.09 USD per second assumption is off. Nice to have if quick: remember the last used mode.
+Also noted: BlueStacks on the laptop is deferred, Luke chose phone and tablet first. The Windows desktop project stays queued behind everything above.
+
+---
+
 Entry 2026-07-12, written by a Cowork session through the GitHub website
 
 STATUS: green, unchanged. Recording a future project from Luke. Do not start it before the first real phone generation test passes.
