@@ -1,5 +1,27 @@
 HANDOFF. Shared logbook between the coding sessions and the Cowork sessions. Read this at the start of every session, update it before you finish, newest entry on top.
 
+Entry 2026-07-12, written by a Claude Code coding session
+
+STATUS: GREEN. Priority-one (cheap Draft mode) is DONE and CI run #11 (commit 89b1469) passed end to end. A new app-debug APK is ready.
+
+IMPORTANT PRICING CORRECTION for Luke: the old "about 1.35 USD per 15s clip" was WRONG. fal.ai bills Seedance 2.0 Fast by resolution-scaled tokens, not a flat 0.09 USD/sec. Verified formula: tokens = width*height*duration*24/1024, at 0.0112 USD per 1000 tokens. That works out to 0.2419 USD/sec at 720p and about 0.108 USD/sec at 480p. So:
+- Final (15s, 720p) is about 3.63 USD per clip, not 1.35.
+- Draft (5s, 480p) is about 0.54 USD per clip.
+CostEstimator now implements this real formula (was a flat 0.09/sec guess). The create screen, confirm dialog, and preview all show the corrected, mode-aware cost. README updated. (Note: fal.ai's own rate is higher than some third-party hosts like Atlas Cloud; we use fal.ai, so fal's rate is what applies.)
+
+Priority-one delivered (Draft mode):
+- Clearly-labeled "Draft mode" toggle on the create screen. Draft = 5s at 480p, audio on. Final = 15s at 720p (unchanged). GenerationMode + OutputResolution in the domain layer.
+- Cost estimate, Generate button, confirm dialog, and preview screen all reflect the selected mode and resolution.
+- Last-used mode is remembered across restarts (SharedPrefsAppPreferences).
+- Usage log records draft vs final on every attempt (GenerationAttempt.mode; logcat tag AdsMakerUsage).
+- Verified: domain unit tests (token math: 0.24192/sec at 720p, draft << final) pass; CI green including assembleDebug.
+
+FOR LUKE, phone-only: download the "app-debug" artifact from the newest green Android CI run (run #11, commit 89b1469; ~20 MB, expires 2026-10-10). Install, open Settings (gear) and paste your fal.ai key if not already saved, then flip Draft mode ON for your first tries — about 0.54 USD each instead of 3.63. When a draft looks right, turn Draft off for the full-quality 15s/720p final.
+
+Still unverified (needs a real phone run): whether Seedance returns a usable video, the model slug, the data-URI image path. Draft mode makes verifying this ~7x cheaper per attempt.
+
+---
+
 Entry 2026-07-12 afternoon, written by a Cowork session through the GitHub website
 
 STATUS: green. The run 8 app-debug APK was delivered to Luke through the Claude chat, checksum verified against the artifact digest. Phone install and first real generation are up next on his side. New feature request from Luke before his test runs.
