@@ -39,6 +39,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -56,6 +57,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.adsmaker.app.data.video.VideoProgress
 import com.adsmaker.app.domain.CostEstimator
+import com.adsmaker.app.domain.GenerationMode
 
 @Composable
 fun CreateAdScreen(
@@ -167,16 +169,24 @@ fun CreateAdScreen(
 
                 PlatformStyleCard()
 
+                DraftModeCard(
+                    isDraft = state.isDraft,
+                    onDraftChange = { draft ->
+                        viewModel.setMode(if (draft) GenerationMode.DRAFT else GenerationMode.FINAL)
+                    },
+                )
+
                 Spacer(Modifier.height(4.dp))
                 Button(
                     onClick = viewModel::requestGenerate,
                     enabled = state.canGenerate,
                     modifier = Modifier.fillMaxWidth().height(54.dp),
                 ) {
-                    Text("Generate ad  ·  ${state.costEstimate.formatted}")
+                    Text("Generate ${state.mode.label.lowercase()}  ·  ${state.costEstimate.formatted}")
                 }
                 Text(
-                    "Estimated ${state.costEstimate.seconds}s × $${CostEstimator.USD_PER_SECOND}/s. You'll confirm before we charge.",
+                    "${state.mode.label}: ${state.costEstimate.seconds}s at ${state.costEstimate.resolutionLabel}. " +
+                        "You'll confirm the ${state.costEstimate.formatted} cost before we charge.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -257,6 +267,32 @@ private fun PlatformStyleCard() {
 }
 
 @Composable
+private fun DraftModeCard(isDraft: Boolean, onDraftChange: (Boolean) -> Unit) {
+    Card(
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        shape = RoundedCornerShape(16.dp),
+        modifier = Modifier.fillMaxWidth(),
+    ) {
+        Row(
+            Modifier.fillMaxWidth().padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+        ) {
+            Column(Modifier.weight(1f)) {
+                Text("Draft mode", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    "Cheap test run — ${GenerationMode.DRAFT_DURATION_SECONDS}s at 480p. " +
+                        "Turn off for the full 15s 720p ad.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
+            Switch(checked = isDraft, onCheckedChange = onDraftChange)
+        }
+    }
+}
+
+@Composable
 private fun ApiKeyMissingCard(onOpenSettings: () -> Unit) {
     Card(
         colors = CardDefaults.cardColors(containerColor = Color(0xFF3A1D2A)),
@@ -289,9 +325,9 @@ private fun CostConfirmDialog(
         title = { Text("Confirm generation") },
         text = {
             Text(
-                "This will generate a ${estimate.seconds}s video and costs about " +
-                    "${estimate.formatted} in API charges. Each attempt (including retries) " +
-                    "is billed. Continue?",
+                "This will generate a ${estimate.seconds}s ${estimate.resolutionLabel} video and " +
+                    "costs about ${estimate.formatted} in API charges. Each attempt (including " +
+                    "retries) is billed. Continue?",
             )
         },
         confirmButton = {

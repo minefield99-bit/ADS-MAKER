@@ -9,8 +9,10 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.adsmaker.app.AdsMakerApplication
 import com.adsmaker.app.core.AppResult
 import com.adsmaker.app.data.repository.AdRepository
+import com.adsmaker.app.data.settings.AppPreferences
 import com.adsmaker.app.data.video.VideoProgress
 import com.adsmaker.app.domain.AdInputs
+import com.adsmaker.app.domain.GenerationMode
 import com.adsmaker.app.util.MediaUtils
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -25,6 +27,7 @@ import kotlinx.coroutines.launch
 class CreateAdViewModel(
     app: Application,
     private val repository: AdRepository,
+    private val preferences: AppPreferences,
     /** Returns whether a usable API key currently exists (from either source). */
     private val hasApiKey: () -> Boolean,
 ) : AndroidViewModel(app) {
@@ -33,12 +36,23 @@ class CreateAdViewModel(
     private var videoUri: Uri? = null
     private var productNotes: String? = null
 
-    private val _uiState = MutableStateFlow(CreateAdUiState(apiKeyMissing = !hasApiKey()))
+    private val _uiState = MutableStateFlow(
+        CreateAdUiState(
+            apiKeyMissing = !hasApiKey(),
+            mode = preferences.getLastMode(),
+        ),
+    )
     val uiState: StateFlow<CreateAdUiState> = _uiState.asStateFlow()
 
     /** Re-check the key after the user may have entered one in Settings. */
     fun refreshApiKeyState() {
         _uiState.update { it.copy(apiKeyMissing = !hasApiKey()) }
+    }
+
+    /** Switch between Draft (cheap test) and Final; remembered across restarts. */
+    fun setMode(mode: GenerationMode) {
+        preferences.setLastMode(mode)
+        _uiState.update { it.copy(mode = mode) }
     }
 
     fun onImagePicked(uri: Uri?) {
@@ -100,6 +114,7 @@ class CreateAdViewModel(
                 videoUri = videoUri,
                 productNotes = productNotes,
                 platform = state.platform,
+                mode = state.mode,
             )
             val result = repository.generateAd(inputs) { progress ->
                 _uiState.update { it.copy(phase = CreateAdUiState.Phase.Generating(progress)) }
@@ -138,6 +153,7 @@ class CreateAdViewModel(
                 return CreateAdViewModel(
                     app = app,
                     repository = app.serviceLocator.adRepository,
+                    preferences = app.serviceLocator.appPreferences,
                     hasApiKey = { app.serviceLocator.hasApiKey },
                 ) as T
             }

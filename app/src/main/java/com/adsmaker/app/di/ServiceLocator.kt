@@ -8,7 +8,9 @@ import com.adsmaker.app.data.session.LocalSessionProvider
 import com.adsmaker.app.data.session.SessionProvider
 import com.adsmaker.app.data.settings.ApiKeyResolver
 import com.adsmaker.app.data.settings.ApiKeyStore
+import com.adsmaker.app.data.settings.AppPreferences
 import com.adsmaker.app.data.settings.SecureApiKeyStore
+import com.adsmaker.app.data.settings.SharedPrefsAppPreferences
 import com.adsmaker.app.data.usage.InMemoryUsageLogger
 import com.adsmaker.app.data.usage.UsageLogger
 import com.adsmaker.app.data.video.SeedanceVideoGenerator
@@ -24,6 +26,9 @@ class ServiceLocator(private val appContext: Context) {
 
     /** On-device store for a user-entered fal.ai key (settable in the app). */
     val apiKeyStore: ApiKeyStore by lazy { SecureApiKeyStore(appContext) }
+
+    /** Non-secret preferences (remembers the last-used Draft/Final mode). */
+    val appPreferences: AppPreferences by lazy { SharedPrefsAppPreferences(appContext) }
 
     /** User-entered key wins; the build-time key is the dev fallback. */
     fun effectiveApiKey(): String =

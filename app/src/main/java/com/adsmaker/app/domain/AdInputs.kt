@@ -12,6 +12,7 @@ data class AdInputs(
     /** Plain-text contents already read from the user's attached text file. */
     val productNotes: String?,
     val platform: PlatformFormat = PlatformFormat.WEEK1_DEFAULT,
+    val mode: GenerationMode = GenerationMode.DEFAULT,
 ) {
     val hasImage: Boolean get() = imageUri != null
     val hasVideo: Boolean get() = videoUri != null

@@ -6,6 +6,7 @@ import java.io.File
 data class GeneratedAd(
     val file: File,
     val platform: PlatformFormat,
+    val mode: GenerationMode,
     val durationSeconds: Int,
     val estimatedCostUsd: Double,
     val seed: Long?,

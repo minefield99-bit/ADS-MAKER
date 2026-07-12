@@ -97,7 +97,8 @@ fun PreviewScreen(
             }
 
             Text(
-                "${ad.platform.displayName} · ${ad.durationSeconds}s · cost ~$${"%.2f".format(ad.estimatedCostUsd)}",
+                "${ad.mode.label} · ${ad.platform.displayName} · ${ad.durationSeconds}s · " +
+                    "${ad.mode.resolution.apiValue} · cost ~$${"%.2f".format(ad.estimatedCostUsd)}",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

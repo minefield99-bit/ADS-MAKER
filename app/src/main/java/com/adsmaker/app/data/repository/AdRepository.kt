@@ -38,7 +38,9 @@ class AdRepository(
         onProgress: (VideoProgress) -> Unit = {},
     ): AppResult<GeneratedAd> {
         val platform = inputs.platform
-        val estimate = CostEstimator.estimate(platform)
+        val mode = inputs.mode
+        val durationSeconds = mode.durationSeconds(platform)
+        val estimate = CostEstimator.estimate(platform, mode)
         val user = sessionProvider.current()
 
         // Build the prompt from the user's notes + proven ad patterns.
@@ -57,8 +59,9 @@ class AdRepository(
         val request = VideoRequest(
             prompt = prompt,
             imageDataUri = imageDataUri,
-            durationSeconds = platform.durationSeconds,
+            durationSeconds = durationSeconds,
             aspectRatio = platform.aspectRatio,
+            resolution = mode.resolution.apiValue,
         )
 
         val result = generator.generate(request, onProgress)
@@ -66,7 +69,7 @@ class AdRepository(
         return when (result) {
             is VideoGenerationResult.Error -> {
                 // A failed attempt can still cost API time — log it for accounting.
-                logAttempt(user.userId, platform, estimate, GenerationAttempt.Outcome.FAILURE)
+                logAttempt(user.userId, platform, mode, estimate, GenerationAttempt.Outcome.FAILURE)
                 AppResult.Failure(result.message, result.cause)
             }
 
@@ -74,19 +77,20 @@ class AdRepository(
                 try {
                     val fileName = "adsmaker_${platform.name.lowercase()}_${clock()}.mp4"
                     val file = downloader.download(appContext, result.videoUrl, fileName)
-                    logAttempt(user.userId, platform, estimate, GenerationAttempt.Outcome.SUCCESS)
+                    logAttempt(user.userId, platform, mode, estimate, GenerationAttempt.Outcome.SUCCESS)
                     AppResult.Success(
                         GeneratedAd(
                             file = file,
                             platform = platform,
-                            durationSeconds = platform.durationSeconds,
+                            mode = mode,
+                            durationSeconds = durationSeconds,
                             estimatedCostUsd = estimate.usd,
                             seed = result.seed,
                         ),
                     )
                 } catch (e: Exception) {
                     // The generation was billed even though the download failed.
-                    logAttempt(user.userId, platform, estimate, GenerationAttempt.Outcome.SUCCESS)
+                    logAttempt(user.userId, platform, mode, estimate, GenerationAttempt.Outcome.SUCCESS)
                     AppResult.Failure("Generated the video but couldn't download it. Please retry.", e)
                 }
             }
@@ -96,6 +100,7 @@ class AdRepository(
     private fun logAttempt(
         userId: String,
         platform: com.adsmaker.app.domain.PlatformFormat,
+        mode: com.adsmaker.app.domain.GenerationMode,
         estimate: CostEstimator.Estimate,
         outcome: GenerationAttempt.Outcome,
     ) {
@@ -103,6 +108,7 @@ class AdRepository(
             GenerationAttempt(
                 userId = userId,
                 platform = platform,
+                mode = mode,
                 durationSeconds = estimate.seconds,
                 estimatedCostUsd = estimate.usd,
                 timestampMillis = clock(),

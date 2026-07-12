@@ -1,11 +1,13 @@
 package com.adsmaker.app.data.usage
 
+import com.adsmaker.app.domain.GenerationMode
 import com.adsmaker.app.domain.PlatformFormat
 
 /** One generation attempt — success or failure — for later billing/quota use. */
 data class GenerationAttempt(
     val userId: String,
     val platform: PlatformFormat,
+    val mode: GenerationMode,
     val durationSeconds: Int,
     val estimatedCostUsd: Double,
     val timestampMillis: Long,

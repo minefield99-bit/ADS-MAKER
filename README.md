@@ -9,8 +9,11 @@ one platform (TikTok), powered by **Seedance 2.0 Fast** via the **fal.ai** API.
 ## What it does (Week 1)
 1. **Input** — pick a product picture (required), an optional video clip, and an
    optional `.txt` notes file describing the product.
-2. **Cost confirmation** — shows the estimated cost (~$1.35 for a 15s TikTok clip
-   at ~$0.09/sec) and requires a confirm tap before any paid API call.
+2. **Cost confirmation** — shows the estimated cost and requires a confirm tap
+   before any paid API call. fal.ai bills Seedance 2.0 Fast by resolution-scaled
+   tokens (≈$0.24/sec at 720p, ≈$0.11/sec at 480p), so a **Final** 15s/720p clip
+   is ≈**$3.63** and a **Draft** 5s/480p test is ≈**$0.54**.
+   Toggle **Draft mode** on the create screen to iterate cheaply.
 3. **Generate** — reads the notes, builds a prompt that encodes the signature
    *sharp → fade-to-blur + text/voice-over* style plus proven ad patterns (hook,
    one clear benefit, CTA), and calls Seedance 2.0 Fast (9:16, ~15s, audio on).
