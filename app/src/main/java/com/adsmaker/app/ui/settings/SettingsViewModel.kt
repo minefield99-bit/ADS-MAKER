@@ -6,12 +6,13 @@ import androidx.lifecycle.viewmodel.CreationExtras
 import com.adsmaker.app.AdsMakerApplication
 import com.adsmaker.app.data.settings.ApiKeyResolver
 import com.adsmaker.app.data.settings.ApiKeyStore
+import com.adsmaker.app.data.settings.AppPreferences
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 
-/** UI state for the API-key settings screen. The full key is never held here. */
+/** UI state for the settings screen. The full API key is never held here. */
 data class SettingsUiState(
     val hasSavedKey: Boolean = false,
     val maskedKey: String? = null,
@@ -19,12 +20,15 @@ data class SettingsUiState(
     val editing: Boolean = true,
     val input: String = "",
     val justSaved: Boolean = false,
+    /** Owner mode: clean (unwatermarked), uncapped generations. */
+    val ownerMode: Boolean = false,
 ) {
     val canSave: Boolean get() = input.isNotBlank()
 }
 
 class SettingsViewModel(
     private val store: ApiKeyStore,
+    private val preferences: AppPreferences,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(initialState())
@@ -36,7 +40,14 @@ class SettingsViewModel(
             hasSavedKey = existing != null,
             maskedKey = existing?.let { ApiKeyResolver.mask(it) },
             editing = existing == null,
+            ownerMode = preferences.isOwnerMode(),
         )
+    }
+
+    /** Owner-only switch: clean videos with no watermark and no free-use cap. */
+    fun setOwnerMode(enabled: Boolean) {
+        preferences.setOwnerMode(enabled)
+        _uiState.update { it.copy(ownerMode = enabled) }
     }
 
     fun onInputChange(value: String) {
@@ -76,7 +87,10 @@ class SettingsViewModel(
                 val app = extras[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY]
                     as AdsMakerApplication
                 @Suppress("UNCHECKED_CAST")
-                return SettingsViewModel(app.serviceLocator.apiKeyStore) as T
+                return SettingsViewModel(
+                    store = app.serviceLocator.apiKeyStore,
+                    preferences = app.serviceLocator.appPreferences,
+                ) as T
             }
         }
     }

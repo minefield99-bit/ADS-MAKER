@@ -4,34 +4,37 @@ package com.adsmaker.app.domain
  * Turns the user's raw materials into a single, well-structured prompt for the
  * video model.
  *
- * This is where the app's "creative intelligence" lives for Week 1. Rather than
- * stitching clips randomly, it encodes:
- *   1. The requested visual style (sharp foreground → fade to blur + overlay/VO).
- *   2. Proven high-performing app-ad patterns (hook in the first seconds, a
- *      single clear benefit, a call-to-action at the end).
- *   3. The target platform's pacing and format.
+ * Two kinds of guidance go in, deliberately kept separate:
+ *  1. STRUCTURE — proven high-performing ad patterns (hook in the first
+ *     seconds, one clear benefit, a call-to-action). This is what makes it an
+ *     *ad* rather than a random clip, and it always applies.
+ *  2. STYLE — entirely the user's decision. If they described a look/feel (in
+ *     their own words, possibly describing an ad they like), it is passed
+ *     through verbatim. There is NO built-in house style: the app imposes no
+ *     fixed transitions, blur effects, or narration treatment.
  *
  * Keeping this pure (no Android deps) makes it unit-testable.
  */
 object AdPromptBuilder {
 
-    /** Cheap keyword pass over the notes to guess what the product is "about". */
+    /** Cheap keyword pass over the notes to guess the call-to-action verb. */
     private val CTA_HINT = Regex("(download|try|get|install|sign up|buy|shop)", RegexOption.IGNORE_CASE)
 
     fun build(
         productNotes: String?,
+        styleDescription: String?,
         platform: PlatformFormat,
-        style: AdStyle = AdStyle.DEFAULT,
         hasReferenceImage: Boolean,
     ): String {
         val notes = productNotes?.trim().takeUnless { it.isNullOrBlank() }
+        val style = styleDescription?.trim().takeUnless { it.isNullOrBlank() }
         val product = notes ?: "the product shown in the reference image"
         val callToAction = deriveCallToAction(notes)
 
         val subject = if (hasReferenceImage) {
-            "Open on the product from the reference image, crisp and sharp in the foreground."
+            "Feature the product from the reference image prominently."
         } else {
-            "Open on a crisp, sharp hero shot of the product in the foreground."
+            "Feature the product prominently."
         }
 
         return buildString {
@@ -41,15 +44,19 @@ object AdPromptBuilder {
             appendLine("PRODUCT / CONTEXT:")
             appendLine(product)
             appendLine()
-            appendLine("STRUCTURE (follow what works for top app ads):")
-            appendLine("- First 2 seconds: a strong visual hook that stops the scroll.")
+            appendLine("STRUCTURE (follow what works for top ads):")
+            appendLine("- First 2 seconds: a strong hook that stops the scroll.")
             appendLine("- $subject")
-            appendLine("- ${style.transitionDescription}")
-            appendLine("- As the background blurs, bold on-screen text and a confident voice-over present the single biggest benefit and build desire.")
+            appendLine("- Present the single biggest benefit and build desire.")
             appendLine("- End on a clear call-to-action: \"$callToAction\".")
             appendLine()
-            appendLine("STYLE: ${style.moodDescription} Vertical ${platform.aspectRatio} framing. Clean, modern, social-media native.")
-            append("AUDIO: energetic voice-over narration matching the pacing, plus subtle background music.")
+            if (style != null) {
+                appendLine("STYLE (follow the user's direction exactly):")
+                appendLine(style)
+            } else {
+                appendLine("STYLE: choose a style that fits the product and feels native to ${platform.displayName}.")
+            }
+            append("FORMAT: ${platform.aspectRatio} framing, with audio.")
         }.trim()
     }
 

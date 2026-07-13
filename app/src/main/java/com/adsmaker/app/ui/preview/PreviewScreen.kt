@@ -98,7 +98,8 @@ fun PreviewScreen(
 
             Text(
                 "${ad.mode.label} · ${ad.platform.displayName} · ${ad.durationSeconds}s · " +
-                    "${ad.mode.resolution.apiValue} · cost ~$${"%.2f".format(ad.estimatedCostUsd)}",
+                    "${ad.mode.resolution.apiValue} · cost ~$${"%.2f".format(ad.estimatedCostUsd)}" +
+                    if (ad.watermarked) " · free trial (watermarked)" else "",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

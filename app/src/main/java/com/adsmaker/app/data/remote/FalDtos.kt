@@ -4,27 +4,45 @@ import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 /**
- * Wire models for the fal.ai queue API hosting Seedance 2.0 Fast.
- * Verified request/response shape (fal.ai Seedance 2.0 docs):
- *   POST https://queue.fal.run/bytedance/seedance-2.0-fast/image-to-video
- *   Authorization: Key <FAL_KEY>
- *   Body: { prompt, image_url, resolution, duration, aspect_ratio, generate_audio }
- *   Result: { video: { url }, seed }
+ * Wire models for the fal.ai queue API. The queue envelope (submit/status) and
+ * the result shape ({ video: { url } }) are shared across models; each model
+ * has its own request body.
  */
 
+/**
+ * Request body for Veo 3.1 Fast (ACTIVE provider). Verified schema (2026-07):
+ *   POST https://queue.fal.run/fal-ai/veo3.1/fast/image-to-video
+ *   duration: "4s" | "6s" | "8s" (max clip is 8s)
+ *   aspect_ratio: "auto" | "16:9" | "9:16"
+ *   resolution: "720p" | "1080p"  ($0.15/sec with audio on both)
+ */
 @Serializable
-data class SeedanceRequest(
+data class VeoRequest(
     val prompt: String,
-    // Optional for text-to-video; a data URI or remote URL for image-to-video.
+    // Omitted for text-to-video; a data URI or remote URL for image-to-video.
     @SerialName("image_url") val imageUrl: String? = null,
-    // fal expects duration as a string: "auto" or "4".."15".
+    // Veo expects a suffixed string: "4s" | "6s" | "8s".
     val duration: String,
     @SerialName("aspect_ratio") val aspectRatio: String,
     val resolution: String,
     @SerialName("generate_audio") val generateAudio: Boolean,
 )
 
-/** Response from submitting to the queue. */
+/**
+ * Request body for Seedance 2.0 Fast (DORMANT provider — see FalConfig).
+ *   duration: "auto" or "4".."15" (unsuffixed), resolution: "480p" | "720p".
+ */
+@Serializable
+data class SeedanceRequest(
+    val prompt: String,
+    @SerialName("image_url") val imageUrl: String? = null,
+    val duration: String,
+    @SerialName("aspect_ratio") val aspectRatio: String,
+    val resolution: String,
+    @SerialName("generate_audio") val generateAudio: Boolean,
+)
+
+/** Response from submitting to the queue (same envelope for all models). */
 @Serializable
 data class QueueSubmitResponse(
     @SerialName("request_id") val requestId: String,
@@ -45,9 +63,9 @@ data class QueueStatusResponse(
     val isInProgress: Boolean get() = status.equals("IN_PROGRESS", ignoreCase = true)
 }
 
-/** Final generation result. */
+/** Final generation result — shared shape across fal video models. */
 @Serializable
-data class SeedanceResult(
+data class FalVideoResult(
     val video: FalFile? = null,
     val seed: Long? = null,
 )

@@ -7,24 +7,23 @@ import java.util.Locale
  * money, so the UI shows an estimate and requires explicit confirmation before
  * calling the API.
  *
- * fal.ai bills Seedance 2.0 Fast by generated *tokens*, not a flat per-second
- * rate, and tokens scale with resolution:
+ * ACTIVE pricing — Veo 3.1 Fast on fal.ai (verified 2026-07): flat per-second,
+ * $0.15/sec WITH audio ($0.10 without) at either 720p or 1080p. We always
+ * generate with audio. So: Final 8s ≈ $1.20, Draft 4s ≈ $0.60.
  *
- *   tokens = width * height * durationSeconds * 24 / 1024
- *   cost   = tokens / 1000 * USD_PER_1000_TOKENS
+ * (Dormant Seedance 2.0 Fast used token billing that scaled with pixels:
+ * tokens = w*h*seconds*24/1024 at $0.0112/1000 tokens ≈ $0.24/sec at 720p.
+ * If Seedance is reactivated, this estimator must be switched back too.)
  *
- * Verified against fal.ai's published Seedance 2.0 Fast pricing (2026-07): this
- * yields $0.2419/sec at 720p and ~$0.108/sec at 480p — which is why Draft mode
- * (5s @ 480p) is dramatically cheaper than Final (15s @ 720p). Re-check the live
- * rate before launch; only USD_PER_1000_TOKENS needs updating if it moves.
+ * Re-check the live rate before launch; only the constants below need updating.
  */
 object CostEstimator {
 
-    /** fal.ai Seedance 2.0 Fast token rate (USD per 1000 tokens). */
-    const val USD_PER_1000_TOKENS = 0.0112
+    /** Veo 3.1 Fast, per generated second, audio on (what the app always uses). */
+    const val USD_PER_SECOND_WITH_AUDIO = 0.15
 
-    private const val TOKEN_FPS_FACTOR = 24
-    private const val TOKEN_DIVISOR = 1024.0
+    /** Veo 3.1 Fast without audio — unused today, kept for reference. */
+    const val USD_PER_SECOND_NO_AUDIO = 0.10
 
     /** Soft budget guard per ad, from the product spec. */
     const val PER_AD_BUDGET_USD = 10.0
@@ -39,18 +38,14 @@ object CostEstimator {
     }
 
     fun estimate(platform: PlatformFormat, mode: GenerationMode): Estimate {
-        val res = mode.resolution
         val seconds = mode.durationSeconds(platform)
         return Estimate(
             seconds = seconds,
-            resolutionLabel = res.apiValue,
-            usd = costUsd(res.width, res.height, seconds),
+            resolutionLabel = mode.resolution.apiValue,
+            usd = costUsd(seconds),
         )
     }
 
-    /** Raw fal.ai token-billing cost for a given resolution and duration. */
-    fun costUsd(width: Int, height: Int, seconds: Int): Double {
-        val tokens = width.toLong() * height * seconds * TOKEN_FPS_FACTOR / TOKEN_DIVISOR
-        return tokens / 1000.0 * USD_PER_1000_TOKENS
-    }
+    /** Flat Veo pricing: seconds × rate (audio always on). */
+    fun costUsd(seconds: Int): Double = seconds * USD_PER_SECOND_WITH_AUDIO
 }

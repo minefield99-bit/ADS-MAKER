@@ -10,4 +10,6 @@ data class GeneratedAd(
     val durationSeconds: Int,
     val estimatedCostUsd: Double,
     val seed: Long?,
+    /** True when the free-trial watermark was burned into the file. */
+    val watermarked: Boolean = false,
 )

@@ -13,9 +13,10 @@ import com.adsmaker.app.data.settings.SecureApiKeyStore
 import com.adsmaker.app.data.settings.SharedPrefsAppPreferences
 import com.adsmaker.app.data.usage.InMemoryUsageLogger
 import com.adsmaker.app.data.usage.UsageLogger
-import com.adsmaker.app.data.video.SeedanceVideoGenerator
+import com.adsmaker.app.data.video.VeoVideoGenerator
 import com.adsmaker.app.data.video.VideoDownloader
 import com.adsmaker.app.data.video.VideoGenerator
+import com.adsmaker.app.data.video.VideoWatermarker
 
 /**
  * Minimal manual dependency container. Week 1 avoids a DI framework to stay
@@ -46,18 +47,24 @@ class ServiceLocator(private val appContext: Context) {
             keyProvider = ::effectiveApiKey,
             enableLogging = BuildConfig.DEBUG,
         )
-        SeedanceVideoGenerator(api)
+        // ACTIVE: Veo 3.1 Fast. To go back to Seedance when fal.ai opens access,
+        // swap this single line to SeedanceVideoGenerator(api).
+        VeoVideoGenerator(api)
     }
 
     private val videoDownloader: VideoDownloader by lazy { VideoDownloader() }
+
+    private val videoWatermarker: VideoWatermarker by lazy { VideoWatermarker() }
 
     val adRepository: AdRepository by lazy {
         AdRepository(
             appContext = appContext,
             generator = videoGenerator,
             downloader = videoDownloader,
+            watermarker = videoWatermarker,
             usageLogger = usageLogger,
             sessionProvider = sessionProvider,
+            preferences = appPreferences,
         )
     }
 }

@@ -36,6 +36,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
@@ -129,7 +130,7 @@ fun CreateAdScreen(
                     style = MaterialTheme.typography.headlineSmall,
                 )
                 Text(
-                    "Add a picture (and optionally a clip or a notes file). We'll generate a ~15s vertical ad.",
+                    "Add a picture (and optionally a clip or a notes file). We'll generate a short vertical ad — you decide the style.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
@@ -167,6 +168,18 @@ fun CreateAdScreen(
                     onClick = { textPicker.launch(arrayOf("text/plain", "text/*")) },
                 )
 
+                OutlinedTextField(
+                    value = state.styleText,
+                    onValueChange = viewModel::onStyleChange,
+                    label = { Text("Ad style (optional) — you decide") },
+                    placeholder = {
+                        Text("e.g. fast cuts, playful, bold captions — or describe an ad you like")
+                    },
+                    minLines = 2,
+                    maxLines = 4,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+
                 PlatformStyleCard()
 
                 DraftModeCard(
@@ -190,6 +203,19 @@ fun CreateAdScreen(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+                when {
+                    state.trialExhausted -> Text(
+                        "Free trial used — generation is paused. Paid plans are coming; " +
+                            "the owner can enable clean videos in Settings.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.secondary,
+                    )
+                    state.willWatermark -> Text(
+                        "Free trial: this video will carry an Ads Maker watermark.",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.secondary,
+                    )
+                }
                 Spacer(Modifier.height(20.dp))
             }
 
@@ -256,9 +282,10 @@ private fun PlatformStyleCard() {
         modifier = Modifier.fillMaxWidth(),
     ) {
         Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text("TikTok · 9:16 · ~15s", style = MaterialTheme.typography.titleMedium)
+            Text("TikTok · 9:16 · up to 8s", style = MaterialTheme.typography.titleMedium)
             Text(
-                "Style: sharp product shot → fades to a soft blur while bold text and voice-over take over.",
+                "The style is yours: whatever you write above drives the look and feel. " +
+                    "Leave it empty and the AI picks something that fits TikTok.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )

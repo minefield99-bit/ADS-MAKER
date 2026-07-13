@@ -68,8 +68,8 @@ private fun AdsMakerApp() {
             SettingsScreen(
                 viewModel = settingsViewModel,
                 onBack = {
-                    // Re-check the key so the create screen reflects a newly-saved one.
-                    viewModel.refreshApiKeyState()
+                    // Re-read key + owner mode so the create screen reflects changes.
+                    viewModel.refreshSettingsState()
                     navController.popBackStack()
                 },
             )

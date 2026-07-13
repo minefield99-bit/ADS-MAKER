@@ -3,9 +3,10 @@ package com.adsmaker.app.data.video
 /**
  * Provider-agnostic contract for the video-generation step.
  *
- * The rest of the app depends only on this interface, never on fal.ai/Seedance
- * directly — so swapping providers later (if Seedance's pricing or access
- * changes) is a one-class change. See [com.adsmaker.app.data.video.SeedanceVideoGenerator].
+ * The rest of the app depends only on this interface, never on a concrete
+ * model API — so swapping providers is a one-class change. ACTIVE provider:
+ * [VeoVideoGenerator] (Veo 3.1 Fast). DORMANT: [SeedanceVideoGenerator]
+ * (Seedance 2.0 Fast, early-access gated on fal.ai as of 2026-07).
  */
 interface VideoGenerator {
     /**
@@ -25,7 +26,7 @@ data class VideoRequest(
     val imageDataUri: String?,
     val durationSeconds: Int,
     val aspectRatio: String,
-    /** "480p" / "720p" — Seedance 2.0 Fast tops out at 720p. */
+    /** "720p" / "1080p" for Veo 3.1 Fast ("480p"/"720p" on dormant Seedance). */
     val resolution: String = "720p",
     /** Native audio synthesis (used for the voice-over narration). */
     val generateAudio: Boolean = true,

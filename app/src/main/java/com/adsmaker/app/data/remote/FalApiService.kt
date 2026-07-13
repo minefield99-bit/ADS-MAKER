@@ -8,16 +8,24 @@ import retrofit2.http.Url
 
 /**
  * Retrofit interface for the fal.ai queue API. The base URL is
- * https://queue.fal.run/ ; [modelPath] selects the Seedance endpoint, e.g.
- * "bytedance/seedance-2.0-fast/image-to-video".
+ * https://queue.fal.run/ ; [modelPath] selects the endpoint, e.g.
+ * "fal-ai/veo3.1/fast/image-to-video".
  *
  * Status/result are polled through the absolute URLs fal returns in the submit
  * response, so those methods take a full @Url.
  */
 interface FalApiService {
 
+    /** Submit a Veo 3.1 generation (ACTIVE provider). */
     @POST("{modelPath}")
-    suspend fun submit(
+    suspend fun submitVeo(
+        @Path("modelPath", encoded = true) modelPath: String,
+        @Body request: VeoRequest,
+    ): QueueSubmitResponse
+
+    /** Submit a Seedance generation (DORMANT provider — kept for reactivation). */
+    @POST("{modelPath}")
+    suspend fun submitSeedance(
         @Path("modelPath", encoded = true) modelPath: String,
         @Body request: SeedanceRequest,
     ): QueueSubmitResponse
@@ -26,5 +34,5 @@ interface FalApiService {
     suspend fun status(@Url statusUrl: String): QueueStatusResponse
 
     @GET
-    suspend fun result(@Url responseUrl: String): SeedanceResult
+    suspend fun result(@Url responseUrl: String): FalVideoResult
 }

@@ -1,5 +1,37 @@
 HANDOFF. Shared logbook between the coding sessions and the Cowork sessions. Read this at the start of every session, update it before you finish, newest entry on top.
 
+Entry 2026-07-13, written by a Claude Code coding session
+
+STATUS: implemented Luke's four decisions (provider switch, no house style, watermark freemium, future list). Pushed; CI result and the new app-debug artifact will be noted here once the run finishes.
+
+DECISION 1 — PROVIDER SWITCHED TO VEO 3.1 FAST (Seedance parked, dormant).
+- Active endpoint: fal-ai/veo3.1/fast/image-to-video (text-to-video fallback: fal-ai/veo3.1/fast). Contract verified live: duration enum "4s"/"6s"/"8s" (so max clip = 8s, as expected), resolution 720p/1080p, aspect auto/16:9/9:16, generate_audio, $0.15/sec WITH audio at both resolutions.
+- New VeoVideoGenerator is active via one line in ServiceLocator; SeedanceVideoGenerator stays in the tree, compiling, dormant (fal.ai gates Seedance behind early access + business-only terms).
+- New costs: Final = 8s at 720p = about $1.20. Draft = 4s = about $0.60 (the earlier "~$0.75 per 5s" note assumed 5s; Veo only does 4/6/8). CostEstimator now uses flat $0.15/sec.
+- Durations: platform clip lengths are capped at 8s (Veo max). The old 15s TikTok target and the ~60s YouTube target need multi-clip stitching later — spec updated with honest budget math (a full 60s YouTube ad would be ~$9 on its own; the $10/3-platform budget needs re-deciding at Week 2+).
+
+DECISION 2 — HOUSE STYLE REMOVED, USER DECIDES.
+- The fixed "sharp foreground, fade-to-blur, narration takeover" style is gone from the prompt builder, UI copy, and tests. AdStyle.kt deleted.
+- New optional "Ad style" text field on the create screen; whatever the user writes is passed to the model verbatim. Empty = the AI picks something platform-appropriate. Ad STRUCTURE (hook, one benefit, CTA) stays — that's effectiveness, not style.
+- Reference-ad imitation ("make it look like this ad") — honest scoping, PROPOSAL ONLY, not built:
+  * Needs a vision-capable model to analyze the reference (extra per-analysis cost); the video model can't watch a clip for us.
+  * Pasted TikTok/IG links are the hard version — those platforms block programmatic fetching; a paste box that usually fails is worse than none.
+  * Smallest honest version to build next: user SHARES A VIDEO FILE into Ads Maker -> sample a few frames on-device -> vision model writes a style recipe (pacing, hook, tone, text treatment — never cloning footage) -> recipe lands in the style field for the user to review/edit before generating. Link pasting only after that works.
+
+DECISION 3 — WATERMARK FREEMIUM BUILT.
+- FreemiumPolicy (pure, unit-tested): free tier = ONE watermarked generation per install, then generation pauses; owner mode = clean and uncapped. Blocked attempts never reach the paid API.
+- Watermark is burned on-device AFTER download (Media3 Transformer, centered translucent "ADS MAKER · FREE TRIAL" text): the provider generates once, clean; for free users the clean copy is deleted the moment the watermarked copy exists (also deleted if watermarking fails — a free user can never end up with a clean file).
+- Owner toggle in Settings ("Owner mode") for Luke's devices. Create screen shows the trial state; preview labels watermarked videos.
+- Economics recorded in the spec: every video INCLUDING free trials bills Luke's fal account (~$0.60/draft, ~$1.20/final), hence the hard cap. Free counter is per-install until accounts/payments exist.
+
+DECISION 4 — FUTURE LIST RECORDED (nothing built): "home factory" — Luke's high-end GPU laptop could later run a free open-source video model to serve free watermarked trials at zero per-video cost, paid finals staying on Veo. Parked behind the payments milestone. Windows desktop stays parked behind the phone test.
+
+Verified this session (no Android SDK here, so JVM-verifiable parts only): domain tests pass (cost 8s=$1.20/4s=$0.60, prompt builder passes user style verbatim + no blur/house-style text, freemium policy allow/watermark/block); the whole remote layer + BOTH generators compile against real Retrofit/OkHttp artifacts; Veo duration snapping (4/6/8) unit-tested. An adversarial multi-agent review ran over the full diff before push. The Media3 Transformer watermark code compiles only on CI (Android artifact) and its runtime behaviour still needs the real-phone test.
+
+NEXT: (1) CI green + new app-debug artifact for Luke — note below when ready. (2) Luke's first real generation, now ~$0.60 in draft mode. (3) His verdict on the shared-video-file style-analysis proposal above. (4) Multi-clip stitching + platform re-budget at Week 2+.
+
+---
+
 Entry 2026-07-12, written by a Claude Code coding session
 
 STATUS: GREEN. Priority-one (cheap Draft mode) is DONE and CI run #11 (commit 89b1469) passed end to end. A new app-debug APK is ready.

@@ -11,6 +11,8 @@ data class AdInputs(
     val videoUri: Uri?,
     /** Plain-text contents already read from the user's attached text file. */
     val productNotes: String?,
+    /** The user's own style direction (free text) — no built-in house style. */
+    val styleDescription: String? = null,
     val platform: PlatformFormat = PlatformFormat.WEEK1_DEFAULT,
     val mode: GenerationMode = GenerationMode.DEFAULT,
 ) {

@@ -2,7 +2,7 @@ package com.adsmaker.app.data.video
 
 import com.adsmaker.app.data.remote.FalApiService
 import com.adsmaker.app.data.remote.FalConfig
-import com.adsmaker.app.data.remote.SeedanceRequest
+import com.adsmaker.app.data.remote.VeoRequest
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
@@ -10,14 +10,14 @@ import retrofit2.HttpException
 import java.io.IOException
 
 /**
- * Seedance 2.0 Fast implementation of [VideoGenerator] — DORMANT as of 2026-07.
+ * Google Veo 3.1 Fast implementation of [VideoGenerator], backed by the fal.ai
+ * queue API — the ACTIVE provider. Chooses image-to-video when a reference
+ * image is present, otherwise text-to-video. All Veo-specific detail lives here.
  *
- * Parked because fal.ai gates Seedance 2.0 behind an early-access wall with
- * business-only terms (verified live). Kept compiling behind [VideoGenerator]
- * so it can be reactivated with a one-line change in ServiceLocator if access
- * opens up. The ACTIVE provider is [VeoVideoGenerator].
+ * Veo constraints (verified 2026-07): clips are 4, 6 or 8 seconds; resolutions
+ * 720p/1080p; aspect ratios auto/16:9/9:16; native audio. $0.15/sec with audio.
  */
-class SeedanceVideoGenerator(
+class VeoVideoGenerator(
     private val api: FalApiService,
 ) : VideoGenerator {
 
@@ -28,27 +28,30 @@ class SeedanceVideoGenerator(
         return try {
             val useImage = !request.imageDataUri.isNullOrBlank()
             val modelPath = if (useImage) {
-                FalConfig.SEEDANCE_IMAGE_TO_VIDEO
+                FalConfig.VEO_IMAGE_TO_VIDEO
             } else {
-                FalConfig.SEEDANCE_TEXT_TO_VIDEO
+                FalConfig.VEO_TEXT_TO_VIDEO
             }
 
             onProgress(VideoProgress(VideoProgress.Stage.QUEUED))
 
-            val body = SeedanceRequest(
+            val body = VeoRequest(
                 prompt = request.prompt,
                 imageUrl = request.imageDataUri.takeIf { useImage },
-                duration = request.durationSeconds.coerceIn(4, 15).toString(),
+                duration = toVeoDuration(request.durationSeconds),
                 aspectRatio = request.aspectRatio,
                 resolution = request.resolution,
                 generateAudio = request.generateAudio,
             )
 
-            val submit = api.submitSeedance(modelPath, body)
+            val submit = api.submitVeo(modelPath, body)
+            // Nested fal endpoints report queue URLs under the base app id
+            // (fal-ai/veo3.1), so prefer the URLs fal returns; the constructed
+            // fallback uses the base id, not the full subpath.
             val statusUrl = submit.statusUrl
-                ?: "${FalConfig.BASE_URL}$modelPath/requests/${submit.requestId}/status"
+                ?: "${FalConfig.BASE_URL}${FalConfig.VEO_QUEUE_BASE_ID}/requests/${submit.requestId}/status"
             val responseUrl = submit.responseUrl
-                ?: "${FalConfig.BASE_URL}$modelPath/requests/${submit.requestId}"
+                ?: "${FalConfig.BASE_URL}${FalConfig.VEO_QUEUE_BASE_ID}/requests/${submit.requestId}"
 
             pollUntilDone(statusUrl, onProgress)
 
@@ -99,11 +102,20 @@ class SeedanceVideoGenerator(
     }
 
     private fun mapHttpError(code: Int): String = when (code) {
-        401, 403 -> "Your API key was rejected. Check the fal.ai key in local.properties."
+        401, 403 -> "Your API key was rejected. Check the fal.ai key in Settings."
         402 -> "Your fal.ai account is out of credit. Add funds to keep generating."
         422 -> "The request was rejected by the video service. Try different inputs."
         429 -> "Too many requests right now. Wait a moment and try again."
         in 500..599 -> "The video service is having trouble. Please try again shortly."
         else -> "The video service returned an error (code $code). Please try again."
+    }
+
+    companion object {
+        /** Veo only accepts 4, 6 or 8 second clips — snap to the nearest tier. */
+        fun toVeoDuration(seconds: Int): String = when {
+            seconds <= 4 -> "4s"
+            seconds <= 6 -> "6s"
+            else -> "8s"
+        }
     }
 }

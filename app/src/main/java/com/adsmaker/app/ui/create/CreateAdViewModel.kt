@@ -40,13 +40,21 @@ class CreateAdViewModel(
         CreateAdUiState(
             apiKeyMissing = !hasApiKey(),
             mode = preferences.getLastMode(),
+            ownerMode = preferences.isOwnerMode(),
+            freeGenerationsUsed = preferences.getFreeGenerationsUsed(),
         ),
     )
     val uiState: StateFlow<CreateAdUiState> = _uiState.asStateFlow()
 
-    /** Re-check the key after the user may have entered one in Settings. */
-    fun refreshApiKeyState() {
-        _uiState.update { it.copy(apiKeyMissing = !hasApiKey()) }
+    /** Re-read settings-backed state (API key, owner mode, free-trial usage). */
+    fun refreshSettingsState() {
+        _uiState.update {
+            it.copy(
+                apiKeyMissing = !hasApiKey(),
+                ownerMode = preferences.isOwnerMode(),
+                freeGenerationsUsed = preferences.getFreeGenerationsUsed(),
+            )
+        }
     }
 
     /** Switch between Draft (cheap test) and Final; remembered across restarts. */
@@ -84,6 +92,11 @@ class CreateAdViewModel(
         _uiState.update { it.copy(notesFileName = null, notesPreview = null) }
     }
 
+    /** The user's own style direction — there is no built-in house style. */
+    fun onStyleChange(text: String) {
+        _uiState.update { it.copy(styleText = text) }
+    }
+
     /** User tapped Generate — surface the cost confirmation first. */
     fun requestGenerate() {
         if (!_uiState.value.canGenerate) return
@@ -113,6 +126,7 @@ class CreateAdViewModel(
                 imageUri = imageUri,
                 videoUri = videoUri,
                 productNotes = productNotes,
+                styleDescription = state.styleText.takeIf { it.isNotBlank() },
                 platform = state.platform,
                 mode = state.mode,
             )
@@ -121,7 +135,12 @@ class CreateAdViewModel(
             }
             when (result) {
                 is AppResult.Success -> _uiState.update {
-                    it.copy(phase = CreateAdUiState.Phase.Done, generatedAd = result.data)
+                    it.copy(
+                        phase = CreateAdUiState.Phase.Done,
+                        generatedAd = result.data,
+                        // A free generation may have consumed the trial.
+                        freeGenerationsUsed = preferences.getFreeGenerationsUsed(),
+                    )
                 }
                 is AppResult.Failure -> _uiState.update {
                     it.copy(phase = CreateAdUiState.Phase.Idle, errorMessage = result.message)
