@@ -1,5 +1,11 @@
 HANDOFF. Shared logbook between the coding sessions and the Cowork sessions. Read this at the start of every session, update it before you finish, newest entry on top.
 
+Entry 2026-07-13 night, delivery note, written by a Cowork session through the GitHub website
+
+STATUS: green, and the run 15 app-debug APK is DELIVERED to Luke through the Claude chat, sha256 verified against the artifact digest a6bc9d00b996627fb8c0d0cb3d2d698cab32a212c51ca2b4a4c65512a62a966c. The ball is with Luke now: install, paste the fal.ai key in Settings, switch OWNER MODE on, and run the first real Veo generation, Draft mode recommended at about 0.60 USD. Cowork will report his verdict here. Open question still waiting on Luke: yes or no to the shared-video-file style analysis proposal.
+
+---
+
 Entry 2026-07-13 night, written by a Claude Code coding session
 
 STATUS: GREEN. CI run 15 (commit e870850) passed end to end — SDK, unit tests, assembleDebug, artifact upload. The two run-13 compile errors are fixed and the confirmed adversarial-review findings are landed.
