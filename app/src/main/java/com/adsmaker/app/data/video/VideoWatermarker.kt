@@ -9,17 +9,19 @@ import android.text.style.AbsoluteSizeSpan
 import android.text.style.ForegroundColorSpan
 import android.text.style.StyleSpan
 import androidx.core.net.toUri
+import androidx.media3.common.Effect
 import androidx.media3.common.MediaItem
+import androidx.media3.common.audio.AudioProcessor
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.effect.OverlayEffect
 import androidx.media3.effect.TextOverlay
+import androidx.media3.effect.TextureOverlay
 import androidx.media3.transformer.Composition
 import androidx.media3.transformer.EditedMediaItem
 import androidx.media3.transformer.Effects
 import androidx.media3.transformer.ExportException
 import androidx.media3.transformer.ExportResult
 import androidx.media3.transformer.Transformer
-import com.google.common.collect.ImmutableList
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
@@ -48,9 +50,14 @@ class VideoWatermarker {
         return withContext(Dispatchers.Main) {
             suspendCancellableCoroutine { continuation ->
                 val overlay = TextOverlay.createStaticTextOverlay(watermarkText())
+                // Kotlin lists with explicit element types: media3's Java
+                // constructors take invariant List<Effect>/List<TextureOverlay>,
+                // which Guava ImmutableList<subtype> does not satisfy under K2.
                 val effects = Effects(
-                    /* audioProcessors = */ ImmutableList.of(),
-                    /* videoEffects = */ ImmutableList.of(OverlayEffect(ImmutableList.of(overlay))),
+                    /* audioProcessors = */ emptyList<AudioProcessor>(),
+                    /* videoEffects = */ listOf<Effect>(
+                        OverlayEffect(listOf<TextureOverlay>(overlay)),
+                    ),
                 )
                 val item = EditedMediaItem.Builder(MediaItem.fromUri(input.toUri()))
                     .setEffects(effects)
@@ -83,18 +90,17 @@ class VideoWatermarker {
 
     private fun watermarkText(): SpannableString {
         val text = SpannableString(WATERMARK_TEXT)
-        val all = 0..text.length
         text.setSpan(
             ForegroundColorSpan(Color.argb(0xB3, 0xFF, 0xFF, 0xFF)),
-            all.first, all.last, Spanned.SPAN_INCLUSIVE_INCLUSIVE,
+            0, text.length, Spanned.SPAN_INCLUSIVE_INCLUSIVE,
         )
         text.setSpan(
             AbsoluteSizeSpan(WATERMARK_TEXT_SIZE_PX),
-            all.first, all.last, Spanned.SPAN_INCLUSIVE_INCLUSIVE,
+            0, text.length, Spanned.SPAN_INCLUSIVE_INCLUSIVE,
         )
         text.setSpan(
             StyleSpan(Typeface.BOLD),
-            all.first, all.last, Spanned.SPAN_INCLUSIVE_INCLUSIVE,
+            0, text.length, Spanned.SPAN_INCLUSIVE_INCLUSIVE,
         )
         return text
     }

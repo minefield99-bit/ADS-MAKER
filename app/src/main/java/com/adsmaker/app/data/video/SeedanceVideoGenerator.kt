@@ -3,6 +3,7 @@ package com.adsmaker.app.data.video
 import com.adsmaker.app.data.remote.FalApiService
 import com.adsmaker.app.data.remote.FalConfig
 import com.adsmaker.app.data.remote.SeedanceRequest
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.withTimeout
@@ -63,6 +64,10 @@ class SeedanceVideoGenerator(
             VideoGenerationResult.Error(
                 "Generation is taking longer than expected. Please try again in a moment.", e,
             )
+        } catch (e: CancellationException) {
+            // Real coroutine cancellation must propagate, never become a
+            // "failed attempt" (which would also mis-log cost accounting).
+            throw e
         } catch (e: HttpException) {
             VideoGenerationResult.Error(mapHttpError(e.code()), e)
         } catch (e: IOException) {

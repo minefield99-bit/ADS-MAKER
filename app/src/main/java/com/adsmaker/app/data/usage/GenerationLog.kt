@@ -8,6 +8,8 @@ data class GenerationAttempt(
     val userId: String,
     val platform: PlatformFormat,
     val mode: GenerationMode,
+    /** True for free-tier (watermarked) attempts, false for owner/paid ones. */
+    val freeTier: Boolean,
     val durationSeconds: Int,
     val estimatedCostUsd: Double,
     val timestampMillis: Long,

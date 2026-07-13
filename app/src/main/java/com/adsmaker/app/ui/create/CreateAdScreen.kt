@@ -184,6 +184,7 @@ fun CreateAdScreen(
 
                 DraftModeCard(
                     isDraft = state.isDraft,
+                    finalSeconds = state.platform.durationSeconds,
                     onDraftChange = { draft ->
                         viewModel.setMode(if (draft) GenerationMode.DRAFT else GenerationMode.FINAL)
                     },
@@ -294,7 +295,11 @@ private fun PlatformStyleCard() {
 }
 
 @Composable
-private fun DraftModeCard(isDraft: Boolean, onDraftChange: (Boolean) -> Unit) {
+private fun DraftModeCard(
+    isDraft: Boolean,
+    finalSeconds: Int,
+    onDraftChange: (Boolean) -> Unit,
+) {
     Card(
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         shape = RoundedCornerShape(16.dp),
@@ -308,8 +313,8 @@ private fun DraftModeCard(isDraft: Boolean, onDraftChange: (Boolean) -> Unit) {
             Column(Modifier.weight(1f)) {
                 Text("Draft mode", style = MaterialTheme.typography.titleMedium)
                 Text(
-                    "Cheap test run — ${GenerationMode.DRAFT_DURATION_SECONDS}s at 480p. " +
-                        "Turn off for the full 15s 720p ad.",
+                    "Cheap test run — a ${GenerationMode.DRAFT_DURATION_SECONDS}s clip at half " +
+                        "the cost. Turn off for the full ${finalSeconds}s 720p ad.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )

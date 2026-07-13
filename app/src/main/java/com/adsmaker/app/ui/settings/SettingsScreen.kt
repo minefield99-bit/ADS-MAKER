@@ -2,6 +2,7 @@
 
 package com.adsmaker.app.ui.settings
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -50,6 +51,10 @@ fun SettingsScreen(
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     var revealed by remember { mutableStateOf(false) }
 
+    // System/gesture back must run the same callback as the top-bar arrow so
+    // the create screen always re-reads key + owner-mode state on return.
+    BackHandler(onBack = onBack)
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -73,7 +78,7 @@ fun SettingsScreen(
             verticalArrangement = Arrangement.spacedBy(14.dp),
         ) {
             Text(
-                "Ads Maker generates videos with the fal.ai (Seedance) service, which needs your own API key.",
+                "Ads Maker generates videos with Google's Veo 3.1 Fast model via fal.ai, which needs your own API key.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 8.dp),

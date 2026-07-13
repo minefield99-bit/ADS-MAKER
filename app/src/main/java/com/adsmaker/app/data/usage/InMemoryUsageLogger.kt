@@ -17,8 +17,8 @@ class InMemoryUsageLogger : UsageLogger {
         Log.i(
             TAG,
             "attempt user=${attempt.userId} platform=${attempt.platform.displayName} " +
-                "mode=${attempt.mode.label} secs=${attempt.durationSeconds} " +
-                "est=$${"%.2f".format(attempt.estimatedCostUsd)} " +
+                "mode=${attempt.mode.label} tier=${if (attempt.freeTier) "free" else "owner"} " +
+                "secs=${attempt.durationSeconds} est=$${"%.2f".format(attempt.estimatedCostUsd)} " +
                 "outcome=${attempt.outcome} totalSpend=$${"%.2f".format(totalSpendUsd())}",
         )
     }

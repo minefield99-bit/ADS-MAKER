@@ -143,7 +143,13 @@ class CreateAdViewModel(
                     )
                 }
                 is AppResult.Failure -> _uiState.update {
-                    it.copy(phase = CreateAdUiState.Phase.Idle, errorMessage = result.message)
+                    it.copy(
+                        phase = CreateAdUiState.Phase.Idle,
+                        errorMessage = result.message,
+                        // A billed-but-failed post-processing run still consumes
+                        // the free trial — keep the UI in sync.
+                        freeGenerationsUsed = preferences.getFreeGenerationsUsed(),
+                    )
                 }
             }
         }

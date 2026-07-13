@@ -20,14 +20,20 @@ class VideoDownloader(
             val dir = File(context.filesDir, "generated").apply { mkdirs() }
             val target = File(dir, fileName)
 
-            val request = Request.Builder().url(url).build()
-            client.newCall(request).execute().use { response ->
-                if (!response.isSuccessful) {
-                    throw IOException("Download failed with HTTP ${response.code}")
+            try {
+                val request = Request.Builder().url(url).build()
+                client.newCall(request).execute().use { response ->
+                    if (!response.isSuccessful) {
+                        throw IOException("Download failed with HTTP ${response.code}")
+                    }
+                    val body = response.body ?: throw IOException("Empty response body")
+                    target.outputStream().use { out -> body.byteStream().copyTo(out) }
                 }
-                val body = response.body ?: throw IOException("Empty response body")
-                target.outputStream().use { out -> body.byteStream().copyTo(out) }
+                target
+            } catch (e: Exception) {
+                // Never leave a partial (possibly clean/unwatermarked) file behind.
+                target.delete()
+                throw e
             }
-            target
         }
 }

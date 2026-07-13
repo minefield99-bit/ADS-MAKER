@@ -1,5 +1,25 @@
 HANDOFF. Shared logbook between the coding sessions and the Cowork sessions. Read this at the start of every session, update it before you finish, newest entry on top.
 
+Entry 2026-07-13 night, written by a Claude Code coding session
+
+STATUS: fixed the two CI run 13 compile errors AND landed the confirmed findings from the adversarial review. Pushed; CI + artifact status will be noted here when the run finishes.
+
+CI fix (VideoWatermarker.kt:53): media3 1.5.1's Effects/OverlayEffect constructors take plain Java List<Effect>/List<TextureOverlay>; Kotlin K2 rejects Guava ImmutableList of a subtype (invariant Java generics). Replaced with explicit Kotlin lists (listOf<Effect>/listOf<TextureOverlay>/emptyList<AudioProcessor>), dropped the Guava import. This was exactly the one file that can't compile locally (no Android SDK here) — everything else was pre-verified on the JVM.
+
+Adversarial review findings landed in the same push (each independently confirmed by a verifier agent before fixing):
+- Free-trial counter now consumed the moment a free-tier generation is BILLED (generator success), not after watermarking. Before, a watermark failure left the cap unconsumed while Luke had already paid — unbounded paid retries. Error messages now say honestly when a failed run still used the trial.
+- CancellationException is no longer swallowed: generators and the repository rethrow it instead of turning user-cancelled work into fake "failed attempt" cost logs.
+- Clean-file leak windows closed: free-tier clean intermediates are named *_pending.mp4 and swept on every app start (crash-window protection); failed downloads delete the partial file; failed watermarking deletes both partials. A free user can no longer recover an unwatermarked video from the app dir in any path we could construct.
+- System/gesture back from Settings now refreshes the create screen (owner-mode/key changes previously only applied via the top-bar arrow).
+- Stale copy fixed: Draft card said "480p / full 15s" (now 4s / 8s 720p, dynamic), Settings said "Seedance" (now Veo 3.1 Fast), manifest comment updated.
+- Usage log now records free vs owner tier per attempt (tier=free|owner in logcat) for future billing math.
+
+One review finding deliberately NOT fixed (recorded as accepted risk): the owner-mode toggle is ungated — any user of this APK can flip it. Today that is fine BY DESIGN: there are no accounts and every user supplies their OWN fal.ai key, so flipping it only spends their own credit. It becomes a real hole the day generations run on Luke's key/backend — gate it (PIN, build flag, or account role) as part of the payments milestone. Also inherent until accounts: the 1-free-video cap is per-install (clear-data/reinstall resets it).
+
+NEXT: unchanged from the entry below — CI green -> artifact note here -> Cowork delivers APK -> Luke's first real Veo generation (~$0.60 draft; remember Owner mode ON on his device for clean output).
+
+---
+
 Entry 2026-07-13 later, written by a Cowork session through the GitHub website
 
 STATUS: RED. CI run 13 for commit 4da25e3, the Veo switch build, failed in task :app:compileDebugKotlin. Unit tests and the APK never ran. Fix these before anything else.
