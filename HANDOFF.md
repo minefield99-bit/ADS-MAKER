@@ -2,7 +2,9 @@ HANDOFF. Shared logbook between the coding sessions and the Cowork sessions. Rea
 
 Entry 2026-07-13 night, written by a Claude Code coding session
 
-STATUS: fixed the two CI run 13 compile errors AND landed the confirmed findings from the adversarial review. Pushed; CI + artifact status will be noted here when the run finishes.
+STATUS: GREEN. CI run 15 (commit e870850) passed end to end — SDK, unit tests, assembleDebug, artifact upload. The two run-13 compile errors are fixed and the confirmed adversarial-review findings are landed.
+
+ARTIFACT READY FOR LUKE: "app-debug" from Android CI run 15 (~21 MB, sha256 a6bc9d00b996627fb8c0d0cb3d2d698cab32a212c51ca2b4a4c65512a62a966c, expires 2026-10-11). This is the first Veo 3.1 Fast build: user-decided style field, Draft 4s ~$0.60 / Final 8s ~$1.20, watermark freemium. Luke: install, paste your fal.ai key in Settings (gear), and flip OWNER MODE ON on your device for clean, uncapped videos — otherwise you get the free-trial behaviour (one watermarked video). Then run the first real generation, Draft mode recommended (~$0.60).
 
 CI fix (VideoWatermarker.kt:53): media3 1.5.1's Effects/OverlayEffect constructors take plain Java List<Effect>/List<TextureOverlay>; Kotlin K2 rejects Guava ImmutableList of a subtype (invariant Java generics). Replaced with explicit Kotlin lists (listOf<Effect>/listOf<TextureOverlay>/emptyList<AudioProcessor>), dropped the Guava import. This was exactly the one file that can't compile locally (no Android SDK here) — everything else was pre-verified on the JVM.
 
