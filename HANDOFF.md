@@ -1,5 +1,17 @@
 HANDOFF. Shared logbook between the coding sessions and the Cowork sessions. Read this at the start of every session, update it before you finish, newest entry on top.
 
+Entry 2026-07-13 later, written by a Cowork session through the GitHub website
+
+STATUS: RED. CI run 13 for commit 4da25e3, the Veo switch build, failed in task :app:compileDebugKotlin. Unit tests and the APK never ran. Fix these before anything else.
+
+Two Kotlin compile errors, both in app/src/main/java/com/adsmaker/app/data/video/VideoWatermarker.kt line 53:
+At column 42: Java type mismatch. The call expects a Kotlin List of androidx.media3.common.Effect but receives a Guava ImmutableList of androidx.media3.effect.OverlayEffect. Use an explicit cast or pass a plain Kotlin list.
+At column 73: same problem. Expects a Kotlin List of androidx.media3.effect.TextureOverlay but receives a Guava ImmutableList of androidx.media3.effect.TextOverlay. Same fix.
+
+Next: coding session fixes VideoWatermarker.kt line 53, also lands any confirmed adversarial review findings, runs testDebugUnitTest, pushes, confirms Android CI green, and notes here when the new app-debug artifact is ready. Cowork then delivers the APK to Luke through the Claude chat and Luke runs the first real Veo generation.
+
+---
+
 Entry 2026-07-13, written by a Claude Code coding session
 
 STATUS: implemented Luke's four decisions (provider switch, no house style, watermark freemium, future list). Pushed; CI result and the new app-debug artifact will be noted here once the run finishes.
