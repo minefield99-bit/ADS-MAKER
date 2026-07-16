@@ -1,5 +1,20 @@
 HANDOFF. Shared logbook between the coding sessions and the Cowork sessions. Read this at the start of every session, update it before you finish, newest entry on top.
 
+Entry 2026-07-16, written by a Claude Code coding session
+
+STATUS: Luke has the run-15 APK installed and running (screenshot confirmed — create screen renders, key card shows as expected with no key). New request from Luke: remove the "Enter API key" step. Decision: bake his key into CI builds via a GitHub Actions secret (Option 1), full backend solution stays parked at the payments milestone.
+
+What changed (pushed in this commit):
+- .github/workflows/android.yml now writes FAL_API_KEY from the repo's Actions secret into local.properties before building. If the secret is absent (as right now, or on fork PRs which never get secrets) it writes an empty value and the app behaves exactly as before — asks for a key. So this push stays green with no secret configured.
+- README documents the zero-setup path + the warning that a secret-built APK contains the owner's key (everyone using it spends Luke's fal credit — fine for personal testing, NOT for public distribution).
+- An in-app key still overrides the baked-in one, and the key card auto-hides once any key exists.
+
+WAITING ON LUKE (one minute, on github.com): repo -> Settings -> Secrets and variables -> Actions -> New repository secret -> Name: FAL_API_KEY -> paste the fal.ai key -> Add secret. Then Actions tab -> newest "Android CI" run -> Re-run all jobs -> download the fresh app-debug. That build needs no key entry. IMPORTANT: from that moment the app-debug artifact contains Luke's key — deliver it only to Luke/trusted testers.
+
+Still open: Luke's verdict on the shared-video-file style-analysis proposal; first real Veo generation (now even easier once the baked-key build lands — Owner mode ON, Draft ~$0.60).
+
+---
+
 Entry 2026-07-13 night, delivery note, written by a Cowork session through the GitHub website
 
 STATUS: green, and the run 15 app-debug APK is DELIVERED to Luke through the Claude chat, sha256 verified against the artifact digest a6bc9d00b996627fb8c0d0cb3d2d698cab32a212c51ca2b4a4c65512a62a966c. The ball is with Luke now: install, paste the fal.ai key in Settings, switch OWNER MODE on, and run the first real Veo generation, Draft mode recommended at about 0.60 USD. Cowork will report his verdict here. Open question still waiting on Luke: yes or no to the shared-video-file style analysis proposal.

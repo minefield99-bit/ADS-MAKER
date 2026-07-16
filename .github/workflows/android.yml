@@ -24,7 +24,17 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
 
-      # No secret needed to compile; BuildConfig.FAL_API_KEY falls back to "".
+      # If the repo has a FAL_API_KEY secret, bake it into the APK so the app
+      # works with zero setup (the in-app key screen then never appears; an
+      # in-app key still overrides this). If the secret is absent — including
+      # on pull requests from forks, which never receive secrets — this writes
+      # an empty value and the app simply asks for a key, same as before.
+      # NOTE: an APK built with the secret contains the owner's key. Share the
+      # app-debug artifact only with people who may spend the owner's fal.ai
+      # credit.
+      - name: Inject fal.ai API key (optional secret)
+        run: echo "FAL_API_KEY=${{ secrets.FAL_API_KEY }}" >> local.properties
+
       - name: Run unit tests
         run: ./gradlew testDebugUnitTest --stacktrace
 

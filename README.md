@@ -40,11 +40,18 @@ You need a fal.ai API key (free to create): <https://fal.ai/dashboard/keys>.
 ### Option A — phone only, no Android Studio (easiest)
 1. Download the **`app-debug`** artifact from the latest green [Android CI run](../../actions).
 2. Install the APK on an Android phone (API 26+; allow "install unknown apps").
-3. Open the app → tap the **settings (gear) icon** (or the **Enter API key**
-   button) → paste your fal.ai key → **Save**. The key is encrypted with the
-   Android Keystore and stored only on that phone.
+3. If the repo owner has configured the `FAL_API_KEY` Actions secret, the key is
+   already baked in — the app works with zero setup. Otherwise, tap the
+   **settings (gear) icon** (or the **Enter API key** button) → paste your
+   fal.ai key → **Save**. The key is encrypted with the Android Keystore and
+   stored only on that phone. (An in-app key always overrides a baked-in one.)
 4. Owner of the app? Flip **Owner mode** in the same Settings screen for clean,
    uncapped videos.
+
+> ⚠️ An APK built with the secret contains the owner's key, and everyone using
+> that APK spends the owner's fal.ai credit — fine for personal testing, not
+> for public distribution. The public/Play Store version must move the key to
+> an owner-controlled backend (planned with the payments milestone).
 
 ### Option B — Android Studio (for development)
 1. Open the project in **Android Studio** (Ladybug or newer) with **Android SDK 35**.
